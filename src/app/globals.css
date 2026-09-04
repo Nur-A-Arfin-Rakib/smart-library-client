@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+@layer base {
+  body {
+    @apply bg-paper text-ink dark:bg-paper-dark dark:text-gray-100 transition-colors duration-300;
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  ::selection {
+    @apply bg-moss/20;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl border border-ink/10 dark:border-white/10 bg-white dark:bg-white/[0.03] shadow-card transition-shadow duration-200;
+  }
+
+  .card-hover {
+    @apply hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-xl bg-ink px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-ink-light active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed dark:bg-moss dark:hover:bg-moss-light;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-xl border border-ink/15 dark:border-white/15 px-4 py-2.5 text-sm font-medium text-ink dark:text-gray-200 transition-all hover:bg-ink/[0.04] dark:hover:bg-white/[0.06] active:scale-[0.98];
+  }
+
+  .input-field {
+    @apply w-full rounded-xl border border-ink/15 dark:border-white/15 bg-white dark:bg-white/[0.03] px-4 py-2.5 text-sm outline-none transition focus:ring-2 focus:ring-moss/40 focus:border-moss/50;
+  }
+
+  .eyebrow {
+    @apply font-mono text-xs tracking-[0.18em] uppercase text-moss dark:text-moss-light;
+  }
+
+  .stat-icon {
+    @apply flex h-10 w-10 items-center justify-center rounded-lg;
+  }
+}
+
