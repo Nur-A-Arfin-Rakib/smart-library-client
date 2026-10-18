@@ -22,10 +22,16 @@ function BooksPage() {
   const [myBorrows, setMyBorrows] = useState<BorrowRecord[]>([]);
   const [wishlistIds, setWishlistIds] = useState<Set<string>>(new Set());
   const [notifiedBooks, setNotifiedBooks] = useState<{ _id: string; book: { title: string } }[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [loading, setLoading] = useState(true);
 
-  const fetchBooks = async (search: string) => {
-    const { data } = await api.get<Book[]>("/books", { params: { search } });
+  const fetchBooks = async (search: string, cat?: string) => {
+    const activeCat = cat !== undefined ? cat : selectedCategory;
+    const params: Record<string, string> = {};
+    if (search) params.search = search;
+    if (activeCat && activeCat !== "all") params.category = activeCat;
+
+    const { data } = await api.get<Book[]>("/books", { params });
     setBooks(data);
   };
 
@@ -155,8 +161,26 @@ function BooksPage() {
         Search the catalog, borrow, renew, or reserve a book.
       </p>
 
-      <div className="mb-8">
-        <SearchBar value={query} onChange={setQuery} placeholder="Search by title or author..." />
+      <div className="mb-8 flex flex-col gap-3">
+        <SearchBar value={query} onChange={setQuery} placeholder="Search by title, author, or ISBN..." />
+        <div className="flex flex-wrap items-center gap-2">
+          {["all", "Computer Science", "Engineering", "Mathematics", "Science", "Literature", "Business"].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => {
+                setSelectedCategory(cat);
+                fetchBooks(query, cat);
+              }}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                selectedCategory === cat
+                  ? "bg-moss text-white shadow-sm"
+                  : "bg-ink/[0.04] text-gray-600 hover:bg-ink/[0.08] dark:bg-white/[0.05] dark:text-gray-300"
+              }`}
+            >
+              {cat === "all" ? "All Categories" : cat}
+            </button>
+          ))}
+        </div>
       </div>
 
       {notifiedBooks.length > 0 && (
@@ -250,9 +274,12 @@ function BooksPage() {
                       Renew
                     </button>
                   )}
-                  {!r.finePaid && r.liveFine > 0 && (
-                    <button onClick={() => handlePayFine(r._id)} className="btn-primary !py-1.5 !px-3 text-xs">
-                      Pay Tk {r.liveFine}
+                  {!r.finePaid && (r.liveFine > 0 || r.fine > 0) && (
+                    <button
+                      onClick={() => handlePayFine(r._id)}
+                      className="btn-primary !bg-stamp hover:!bg-stamp-light !py-1.5 !px-3 text-xs"
+                    >
+                      Pay Tk {r.liveFine || r.fine}
                     </button>
                   )}
                   {r.status === "returned" && r.book?._id && (

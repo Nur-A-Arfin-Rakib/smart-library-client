@@ -29,6 +29,11 @@ function ZoneAdmin() {
   const [seatZoneId, setSeatZoneId] = useState<string | null>(null);
   const [seatNumber, setSeatNumber] = useState("");
   const [expandedZoneId, setExpandedZoneId] = useState<string | null>(null);
+  const [isBatch, setIsBatch] = useState(false);
+  const [batchPrefix, setBatchPrefix] = useState("A");
+  const [batchStart, setBatchStart] = useState(1);
+  const [batchEnd, setBatchEnd] = useState(10);
+  const [addingBatch, setAddingBatch] = useState(false);
 
   const fetchZones = async () => {
     setLoading(true);
@@ -73,6 +78,27 @@ function ZoneAdmin() {
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Failed to add seat");
     }
+  };
+
+  const handleAddBatchSeats = async (zoneId: string) => {
+    if (batchStart > batchEnd || batchEnd - batchStart > 50) {
+      toast.error("Valid range is up to 50 seats per batch");
+      return;
+    }
+    setAddingBatch(true);
+    let created = 0;
+    for (let i = batchStart; i <= batchEnd; i++) {
+      try {
+        await api.post(`/admin/zones/${zoneId}/seats`, { seatNumber: `${batchPrefix}${i}` });
+        created++;
+      } catch {
+        // Continue on existing duplicates
+      }
+    }
+    toast.success(`Batch complete: ${created} seat(s) created!`);
+    setAddingBatch(false);
+    setSeatZoneId(null);
+    fetchZones();
   };
 
   const handleDeleteSeat = async (zoneId: string, seatId: string) => {
@@ -190,27 +216,93 @@ function ZoneAdmin() {
               )}
 
               {seatZoneId === zone._id ? (
-                <div className="flex gap-2">
-                  <input
-                    autoFocus
-                    value={seatNumber}
-                    onChange={(e) => setSeatNumber(e.target.value)}
-                    placeholder="Seat number, e.g. A1"
-                    className="input-field !py-1.5 text-sm"
-                  />
-                  <button onClick={() => handleAddSeat(zone._id)} className="btn-primary !py-1.5 !px-3 text-sm">
-                    Add
-                  </button>
-                  <button onClick={() => setSeatZoneId(null)} className="btn-secondary !py-1.5 !px-3 text-sm">
-                    Cancel
-                  </button>
+                <div className="flex flex-col gap-2 rounded-lg border border-ink/10 bg-ink/[0.02] p-3 dark:border-white/10 dark:bg-white/[0.02]">
+                  <div className="flex items-center gap-3 text-xs mb-1">
+                    <button
+                      type="button"
+                      onClick={() => setIsBatch(false)}
+                      className={`font-medium ${!isBatch ? "text-moss font-bold underline" : "text-gray-400"}`}
+                    >
+                      Single Seat
+                    </button>
+                    <span>|</span>
+                    <button
+                      type="button"
+                      onClick={() => setIsBatch(true)}
+                      className={`font-medium ${isBatch ? "text-moss font-bold underline" : "text-gray-400"}`}
+                    >
+                      Batch Add (Range)
+                    </button>
+                  </div>
+
+                  {!isBatch ? (
+                    <div className="flex gap-2">
+                      <input
+                        autoFocus
+                        value={seatNumber}
+                        onChange={(e) => setSeatNumber(e.target.value)}
+                        placeholder="Seat number, e.g. A1"
+                        className="input-field !py-1.5 text-xs"
+                      />
+                      <button onClick={() => handleAddSeat(zone._id)} className="btn-primary !py-1 !px-3 text-xs">
+                        Add
+                      </button>
+                      <button onClick={() => setSeatZoneId(null)} className="btn-secondary !py-1 !px-3 text-xs">
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="w-16">
+                        <label className="text-[10px] text-gray-400">Prefix</label>
+                        <input
+                          value={batchPrefix}
+                          onChange={(e) => setBatchPrefix(e.target.value.toUpperCase())}
+                          className="input-field !py-1 text-xs text-center"
+                          placeholder="A"
+                        />
+                      </div>
+                      <div className="w-16">
+                        <label className="text-[10px] text-gray-400">From</label>
+                        <input
+                          type="number"
+                          min={1}
+                          value={batchStart}
+                          onChange={(e) => setBatchStart(Number(e.target.value))}
+                          className="input-field !py-1 text-xs text-center"
+                        />
+                      </div>
+                      <div className="w-16">
+                        <label className="text-[10px] text-gray-400">To</label>
+                        <input
+                          type="number"
+                          min={1}
+                          value={batchEnd}
+                          onChange={(e) => setBatchEnd(Number(e.target.value))}
+                          className="input-field !py-1 text-xs text-center"
+                        />
+                      </div>
+                      <div className="flex gap-2 self-end mt-3">
+                        <button
+                          disabled={addingBatch}
+                          onClick={() => handleAddBatchSeats(zone._id)}
+                          className="btn-primary !py-1 !px-3 text-xs"
+                        >
+                          {addingBatch ? "Creating..." : "Generate Seats"}
+                        </button>
+                        <button onClick={() => setSeatZoneId(null)} className="btn-secondary !py-1 !px-3 text-xs">
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <button
                   onClick={() => setSeatZoneId(zone._id)}
-                  className="text-sm font-medium text-accent hover:underline"
+                  className="text-xs font-medium text-moss hover:underline"
                 >
-                  + Add seat
+                  + Add seats
                 </button>
               )}
             </div>

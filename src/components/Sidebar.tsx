@@ -31,6 +31,7 @@ interface NavItem {
 const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
   student: [
     { href: "/student", label: "Overview", icon: LayoutDashboard },
+    { href: "/student/attendance", label: "Attendance", icon: ClipboardCheck },
     { href: "/student/booking", label: "Book a seat", icon: CalendarCheck },
     { href: "/student/my-bookings", label: "My bookings", icon: Layers },
     { href: "/student/books", label: "Books", icon: BookMarked },
@@ -38,8 +39,8 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
   ],
   librarian: [
     { href: "/librarian", label: "Overview", icon: LayoutDashboard },
-    { href: "/librarian/checkin", label: "Manual check-in", icon: ScanLine },
-    { href: "/librarian/returns", label: "Returns & fines", icon: Undo2 },
+    { href: "/librarian/checkin", label: "Desk Check-in", icon: ScanLine },
+    { href: "/librarian/returns", label: "Returns & Fines", icon: Undo2 },
   ],
   admin: [
     { href: "/admin", label: "Overview", icon: LayoutDashboard },
@@ -47,6 +48,7 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
     { href: "/admin/users", label: "Users & roles", icon: Users },
     { href: "/admin/zones", label: "Zones & seats", icon: Layers },
     { href: "/admin/books", label: "Books", icon: LibraryBig },
+    { href: "/librarian", label: "Librarian desk", icon: Undo2 },
   ],
 };
 

@@ -70,7 +70,7 @@ function LibrarianDashboard() {
 
 export default function LibrarianPage() {
   return (
-    <RequireRole allow={["librarian"]}>
+    <RequireRole allow={["librarian", "admin"]}>
       <LibrarianDashboard />
     </RequireRole>
   );
